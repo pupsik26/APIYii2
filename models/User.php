@@ -5,6 +5,7 @@ namespace app\models;
 
 use yii\base\InvalidConfigException;
 use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "user".
@@ -15,7 +16,7 @@ use yii\db\ActiveQuery;
  * @property string $created_at
  * @property string $updated_at
  */
-class User extends \yii\db\ActiveRecord
+class User extends ActiveRecord
 {
 
     /**
@@ -65,5 +66,14 @@ class User extends \yii\db\ActiveRecord
         return $this->hasMany(Message::class, ['id' => 'id_message'])->viaTable('user_message', [
             'id_user' => 'id'
         ]);
+    }
+
+    /**
+     * @param $name
+     * @return string|null
+     */
+    public function checkEmail($name)
+    {
+        return User::findOne(['name' => $name])->email;
     }
 }

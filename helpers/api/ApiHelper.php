@@ -39,6 +39,11 @@ class ApiHelper extends HelpController
     public static function saveModel($modelMessage, $modelUser)
     {
         $idUser = User::findOne(['name' => $modelUser->name]);
+        if (!($modelUser->checkEmail($modelUser->name) == $modelUser->email)) {
+            $e = new ApiException('Email: ' . $modelUser->email . ' не соответсвует пользователю: ' . $modelUser->name, 400, 'POST');
+            $data = $e->getAllInfoRequest();
+            return $data;
+        }
         if ($modelUser->save() && $modelMessage->save()) {
             $modelMessage->link('users', $modelUser);
             return static::sendResponse(200, 'OK', 'Заявка успешно отправлена, ждите ответа на почту');
@@ -75,6 +80,11 @@ class ApiHelper extends HelpController
             }
         }
         return static::saveModel($modelMessage, $modelUser);
+    }
+
+    public static function checkEmailForUser()
+    {
+
     }
 
 }
