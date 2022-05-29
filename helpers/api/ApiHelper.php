@@ -3,78 +3,78 @@
 namespace app\helpers\api;
 
 use app\models\Message;
-use Yii;
+use app\models\User;
 use yii\console\controllers\HelpController;
 use yii\web\Response;
 
 class ApiHelper extends HelpController
 {
 
+    public static $postAttribute = [
+        'comment' => false,
+        'email' => false,
+        'name' => false,
+    ];
+
     /**
-     * Метод ответа
-     * @param $message
-     * @param $code
+     * @int $value
+     * @string $text
+     * @string $data
+     * @return Response
      */
-    public static function createResponse($message, $code)
+    public static function sendResponse($value, $text, $data)
     {
-        $response = Yii::$app->response;
-        $response->format = Response::FORMAT_JSON;
-        $response->data = [
-            'message' => $message,
-            'statusCode'=> $code
-        ];
-        $response->send();
+        $response = new Response();
+        $response->setStatusCode($value, $text);
+        $response->data = $data;
+        return $response;
     }
 
     /**
-     * Метод создания новой модели
-     * @return array
+     * Сохранения моделей
+     * @param $modelMessage
+     * @param $modelUser
+     * @return array|Response
      */
-    public static function checkAttribute()
+    public static function saveModel($modelMessage, $modelUser)
     {
-        $model = new Message();
-        $params = $params = \Yii::$app->request->bodyParams;
-        $model->load($params);
-        return static::saveModel($model);
-    }
-
-    /**
-     * Метод сохранения модели в БД
-     * @param $model
-     * @return array
-     */
-    protected static function saveModel($model)
-    {
-        if ($model->save()) {
-            $message = 'Данные успешно добавленны';
-            $statusCode = 200;
-            static::createResponse($message, $statusCode);
+        $idUser = User::findOne(['name' => $modelUser->name]);
+        if ($modelUser->save() && $modelMessage->save()) {
+            $modelMessage->link('users', $modelUser);
+            return static::sendResponse(200, 'OK', 'Заявка успешно отправлена, ждите ответа на почту');
+        } else if (!empty($idUser) && $modelMessage->save()) {
+            $modelMessage->link('users', $idUser);
+            return static::sendResponse(200, 'OK', 'Заявка успешно отправлена, ждите ответа на почту');
         } else {
-            $message = 'Не удалось добавить данные в таблицу';
-            $statusCode = 400;
-            static::createResponse($message, $statusCode);
+            $e = new ApiException('Ошибка при сохранении, проверьте правильность и полноту параметров', 400, 'POST');
+            $data = $e->getAllInfoRequest();
+            return $data;
         }
     }
 
     /**
-     * Метод проверки POST тела запроса на лишние поля
-     * @return array
+     * Проверка на существование атрибутов
+     * @param $params
+     * @return array|Response
      */
-    public static function validatePostRequest()
+    public static function checkPOSTBodyParams($params)
     {
-        $post = Yii::$app->request->post();
-        if (empty($post['comment']) || (count($post) > 1)) {
-            $message = 'Ошибка в теле запроса';
-            $statusCode = 400;
-            static::createResponse($message, $statusCode);
-        } else {
-            return static::checkAttribute();
+        $modelMessage = new Message();
+        $modelUser = new User();
+        foreach ($params as $key => $param) {
+            if ($modelMessage->hasAttribute($key) && array_key_exists($key, static::$postAttribute)) {
+                $modelMessage->$key = $param;
+                static::$postAttribute[$key] = true;
+            } else if ($modelUser->hasAttribute($key) && array_key_exists($key, static::$postAttribute)) {
+                $modelUser->$key = $param;
+                static::$postAttribute[$key] = true;
+            } else {
+                $e = new ApiException('Не верный параметр запроса: ' . $key, 400, 'POST');
+                $data = $e->getAllInfoRequest();
+                return $data;
+            }
         }
-    }
-
-    public static function validatePutRequest()
-    {
-
+        return static::saveModel($modelMessage, $modelUser);
     }
 
 }

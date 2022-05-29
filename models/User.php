@@ -3,6 +3,9 @@
 namespace app\models;
 
 
+use yii\base\InvalidConfigException;
+use yii\db\ActiveQuery;
+
 /**
  * This is the model class for table "user".
  *
@@ -11,11 +14,10 @@ namespace app\models;
  * @property string $email
  * @property string $created_at
  * @property string $updated_at
- *
- * @property UserMessages[] $userMessages
  */
 class User extends \yii\db\ActiveRecord
 {
+
     /**
      * {@inheritdoc}
      */
@@ -31,7 +33,8 @@ class User extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'email'], 'required'],
-            [['email'], 'string'],
+            [['email'], 'email'],
+            [['email', 'name'], 'unique'],
             [['created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
         ];
@@ -54,10 +57,13 @@ class User extends \yii\db\ActiveRecord
     /**
      * Gets query for [[UserMessages]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
+     * @throws InvalidConfigException
      */
-    public function getUserMessages()
+    public function getMessages()
     {
-        return $this->hasMany(UserMessages::className(), ['id_user' => 'id']);
+        return $this->hasMany(Message::class, ['id' => 'id_message'])->viaTable('user_message', [
+            'id_user' => 'id'
+        ]);
     }
 }

@@ -11,8 +11,6 @@ namespace app\models;
  * @property int $status
  * @property string $created_at
  * @property string $updated_at
- *
- * @property UserMessages[] $userMessages
  */
 class Message extends \yii\db\ActiveRecord
 {
@@ -41,7 +39,6 @@ class Message extends \yii\db\ActiveRecord
     {
         return [
             [['comment'], 'required'],
-            [['comment'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
         ];
     }
@@ -64,9 +61,12 @@ class Message extends \yii\db\ActiveRecord
      * Gets query for [[UserMessages]].
      *
      * @return \yii\db\ActiveQuery
+     * @throws \yii\base\InvalidConfigException
      */
-    public function getUserMessages()
+    public function getUsers()
     {
-        return $this->hasMany(UserMessages::className(), ['id_messages' => 'id']);
+        return $this->hasMany(User::class, ['id' => 'id_user'])->viaTable('user_message', [
+            'id_message' => 'id'
+        ]);
     }
 }

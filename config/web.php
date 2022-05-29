@@ -9,7 +9,7 @@ $config = [
     'bootstrap' => ['log'],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
-        '@npm'   => '@vendor/npm-asset',
+        '@npm' => '@vendor/npm-asset',
     ],
     'components' => [
         'response' => [
@@ -67,10 +67,13 @@ $config = [
             'enableStrictParsing' => true,
             'rules' => [
 //                ['class' => 'yii\rest\UrlRule', 'controller' => 'message'],
-                'GET message/<status>' => 'message/get',
-                'GET message/<status>/<sort>' => 'message/get',
                 'GET message' => 'message/all',
                 'GET message?sort=<sort>' => 'message/all',
+                'GET message/user/<id>' => 'message/get',
+                'GET message/username/<name>' => 'message/get',
+                'GET message/<status>' => 'message/get',
+                'GET message/<status>/<sort>' => 'message/get',
+                'POST message' => 'message/post'
             ],
         ],
 
