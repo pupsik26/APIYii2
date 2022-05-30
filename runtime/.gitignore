@@ -1,2 +1,7 @@
-*
 !.gitignore
+!db_example_sql
+!Postman_request
+cache
+debug
+gii-2.0.45
+logs
