@@ -59,7 +59,7 @@ class UserMessages extends \yii\db\ActiveRecord
      */
     public function getMessage()
     {
-        return $this->hasOne(Message::className(), ['id' => 'id_messages']);
+        return $this->hasOne(Message::className(), ['id' => 'id_message']);
     }
 
     /**

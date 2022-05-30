@@ -73,7 +73,9 @@ $config = [
                 'GET message/username/<name>' => 'message/get',
                 'GET message/<status>' => 'message/get',
                 'GET message/<status>/<sort>' => 'message/get',
-                'POST message' => 'message/post'
+                'POST message' => 'message/post',
+                'PUT message' => 'message/put',
+                'DELETE message/<id>' => 'message/delete'
             ],
         ],
 

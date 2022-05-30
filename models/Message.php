@@ -39,7 +39,7 @@ class Message extends \yii\db\ActiveRecord
     {
         return [
             [['comment'], 'required'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at', 'id'], 'safe'],
         ];
     }
 
@@ -65,7 +65,7 @@ class Message extends \yii\db\ActiveRecord
      */
     public function getUsers()
     {
-        return $this->hasMany(User::class, ['id' => 'id_user'])->viaTable('user_message', [
+        return $this->hasOne(User::class, ['id' => 'id_user'])->viaTable('user_message', [
             'id_message' => 'id'
         ]);
     }

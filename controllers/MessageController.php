@@ -3,12 +3,13 @@
 namespace app\controllers;
 
 use app\helpers\api\ApiException;
+use app\helpers\api\ApiHelperMessage;
 use app\models\Message;
-use app\helpers\api\ApiHelper;
 use app\models\User;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\StaleObjectException;
 use yii\web\Response;
 
 class MessageController extends \yii\rest\Controller
@@ -65,13 +66,29 @@ class MessageController extends \yii\rest\Controller
     public function actionPost()
     {
         $body = Yii::$app->request->bodyParams;
-        $params = ApiHelper::checkPOSTBodyParams($body);
-        return $params;
+        $response = ApiHelperMessage::checkPOSTBodyParams($body);
+        return $response;
     }
 
     public function actionPut()
     {
+        $body = Yii::$app->request->bodyParams;
+        $response = ApiHelperMessage::checkPUTBodyParams($body);
+        return $response;
+    }
 
+    public function actionDelete($id)
+    {
+        try {
+            return ApiHelperMessage::deleteMessage($id);
+        } catch (StaleObjectException $e) {
+            $data = [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'name' => $e->getName()
+            ];
+            return $data;
+        }
     }
 
 }
